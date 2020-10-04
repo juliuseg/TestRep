@@ -1,0 +1,179 @@
+%%% VIGTIGT. Skal kompileres med LuaLatex for at virke!
+
+\documentclass[11pt,a4paper]{article}
+
+\addtolength{\textheight}{2.5cm}
+\addtolength{\topmargin}{-1.25cm}
+
+\usepackage[danish]{babel}
+\usepackage{amssymb}
+\usepackage[utf8]{luainputenc}
+\usepackage{url}
+
+%%%% tikz er pakken som gør det hele muligt %%%%
+
+\usepackage{tikz}
+\usetikzlibrary{graphs,graphdrawing,quotes,babel} % vi har brug for nogle tikz-biblioteker
+\usegdlibrary{trees, layered} % biblioteker til graf-placerings-algoritmer
+
+%%%% et par kommandoer til at markere åbne og lukkede grene %%%%
+
+\newcommand{\closed}{child[white, level distance=5mm] {node[black] {$\times$}}}
+\newcommand{\open}{child[white, level distance=5mm] {node[black] {$\bigcirc$}}}
+
+%%%%% et par shortcuts for typesetting af de to sandhedsværdier %%%%%
+
+\newcommand{\F}{\mathtt{F}}
+\newcommand{\T}{\mathtt{T}}
+
+%%%%%% navne på tableaureglerne: %%%%%%%%
+%%  \tof er en forkortelse for "->F"
+%% \lorf er en forkortelse for  "\/F"
+%% \landf er en forkortelse for "/\F"
+%% osv.
+
+
+\newcommand{\lorf}{\ensuremath{\lor\F}}
+\newcommand{\lort}{\ensuremath{\lor\T}}
+\newcommand{\landf}{\ensuremath{\land\F}}
+\newcommand{\landt}{\ensuremath{\land\T}}
+\newcommand{\tof}{\ensuremath{\to\!\F}}
+\newcommand{\tot}{\ensuremath{\to\!\T}}
+\newcommand{\lrf}{\ensuremath{\leftrightarrow\!\F}}
+\newcommand{\lrt}{\ensuremath{\leftrightarrow\!\T}}
+\newcommand{\negf}{\ensuremath{\neg\F}}
+\newcommand{\negt}{\ensuremath{\neg\T}}
+\newcommand{\allf}{\ensuremath{\forall\F}}
+\newcommand{\allt}{\ensuremath{\forall\T}}
+\newcommand{\exf}{\ensuremath{\exists\F}}
+\newcommand{\ext}{\ensuremath{\exists\T}}
+
+
+%%%%%%% en kommando til at typesette formlerne i tableauer. Kommandoen kaldes med \formel{<nummer>}{<formel>}{<F hvis sættes falsk, T hvis sættes sand>} %%%%%%%%%%%%%%%%
+
+\newcommand{\formel}[3]{{\color{red} \scriptsize #1} $#2: \ifx#3F \F \else \T \fi$}
+
+
+
+
+\title{tikz tableau-eksempler i Latex}
+\author{Thomas Bolander}
+\date{\today}
+
+
+\begin{document}
+\maketitle
+
+Vigtig information:
+\begin{itemize}
+  \item Dokumentet kan kun kompilere med LuaLatex. Det er fordi jeg gør brug af nogen pakker som kalder graf-placerings-algoritmer, som kun findes til LuaLatex. Fordelen ved dette er så til gengæld at man har et meget slagkraftigt værktøj, som selv kan placere knuderne i grafer og træer uden at man behøver specificere koordinater el.lign.
+  \item Hvis du vil vide mere om de værktøjer jeg bruger, så kig på manualen til tikz og pgf: 
+  \begin{center} \color{blue} \footnotesize
+  \url{http://mirrors.dotsrc.org/ctan/graphics/pgf/base/doc/pgfmanual.pdf}
+  \end{center}
+  \item Tikz kan mange ting, som man kan se her:
+  \begin{center} \color{blue} \footnotesize
+  \url{http://www.texample.net/tikz/examples/}
+  \end{center}
+   Men det er nok ikke for alle at skulle bruge et tekstuelt format til at angive grafisk indhold. Det kræver noget tilvænning. Gå ikke i gang med at bruge tikz i latex til at lave tableauer, hvis du er under tidspres! Når man har vænnet sig til at bruge det kan det være ret effektivt, men i starten kan det godt være noget af en tidssluger.
+  \item For at skære det ud i pap skal du kun kaste dig ud i at lave tableauer i Latex hvis: 1) du har god tid; 2) du synes det er sjovt at rode med den slags; 3) du forventer at skulle bruge tikz til andre ting i fremtiden (hvad mange af jer givetvis vil komme til).
+  \item For at komme i gang kan du kigge på eksemplerne nedenfor samt de korte instruktioner jeg har skrevet som kommentarer i selve tex-dokumentet. 
+\end{itemize}
+
+
+\subsection*{Eksempel 1}
+
+ \[
+ \begin{tikzpicture}[align=center,every edge quotes/.style={magenta,auto,font=\scriptsize}]
+   \graph[trie,tree layout,level sep=7mm,sibling distance=30mm] 
+   {
+   %% "--" bruges til at lave en kant. Så herunder har vi  først formlen (p->q)->q som vi sætter F, og dernæst en kant:
+     "\formel{1}{((p \to q) \to q) \to q}{F}" -- 
+     %% nu kommer der to formler lige under hinanden (begge konklusioner af samme regel), og dem adskilller vi med "\\". 
+     %% Desuden skal vi markere navnet på reglen vi har brugt. Det gør vi med [> "\tof" på 1"]:
+     "\formel{2}{(p \to q) \to q}{T} \\ \formel{3}{q}{F}" [> "$\tof$ på 1"] --  
+     %% nu har vi brug for en forgrening. Derfor starter vi en Tuborg-parantes med to elementer, den venstre gren og den
+     %% højre gren, separeret af et komma:
+     {
+       "\formel{4}{p \to q}{F}" --
+       "\formel{6}{p}{T} \\ \formel{7}{q}{F} \\ \bigcirc" [>"$\tof$ på 4"] , 
+       "\formel{5}{q}{T} \\ \times" [> "$\tot$ på 2",yshift=-2mm] 
+     }
+  };
+  \end{tikzpicture}
+\]
+
+\subsection*{Eksempel 2}
+
+\[
+ \begin{tikzpicture}[align=center,every edge quotes/.style={magenta,auto,font=\scriptsize}]
+   \graph[trie,tree layout,level sep=7mm,sibling distance=30mm] 
+   {
+     "\formel{1}{((q \to p) \to q) \to q}{F}" -- 
+     "\formel{2}{(q \to p) \to q}{T} \\ \formel{3}{q}{F}" [> "$\tof$ på 1"] --  
+     {
+       "\formel{4}{q \to p}{F}" --
+       "\formel{6}{q}{T} \\ \formel{7}{p}{F} \\ \times" [>"$\tof$ på 4"] , 
+       "\formel{5}{q}{T} \\ \times" [> "$\tot$ på 2",yshift=-2mm] 
+     }
+  };
+  \end{tikzpicture}
+\]
+
+
+\subsection*{Eksempel 3}
+
+\[
+  \begin{tikzpicture}[align=center,every edge quotes/.style={magenta,auto,font=\scriptsize}]
+    \graph[trie,tree layout,level sep=7mm,sibling distance=30mm] 
+    {  
+      "\formel{1}{(p \to q) \wedge (p \to \neg q) \to \neg p}{F}" --
+      "\formel{2}{(p \to q) \wedge (p \to \neg q)}{T} \\ \formel{3}{\neg p}{F}" [> "$\to\!\F$ på 1"] --
+      "\formel{4}{p}{T}"[> "$\neg\F$ på 3"] --
+      "\formel{5}{p \to q}{T} \\ \formel{6}{p \to \neg q}{T}" [> "$\land\top$ på 2"] --
+      {
+        "\formel{7}{p}{F} \\ \times"[yshift=-2mm]  ,
+        "\formel{8}{q}{T}" [>  "$\to\T$ på 5" near end] -- 
+        {
+          "\formel{9}{p}{F} \\ \times"[yshift=-2mm] ,
+          "\formel{10}{\neg q}{T}"  [> "$\to\T$ på 6" near end]  -- "\formel{11}{q}{F} \\ \times" [> "$\neg\top$ på 10"]
+        }
+      }
+    };
+  \end{tikzpicture}
+\]
+
+\subsection*{Eksempel 4}
+
+\[
+  \begin{tikzpicture}[align=center,every edge quotes/.style={magenta,auto,font=\scriptsize}]
+    \graph[trie,tree layout,level sep=7mm,sibling distance=30mm] 
+    {  
+      "\formel{1}{ p \leftrightarrow ((q \leftrightarrow r) \leftrightarrow ((p \leftrightarrow q) \leftrightarrow (p \leftrightarrow r))) }{F}" --
+      {
+        "\formel{2}{\neg (p \wedge q)}{1} \\ \formel{3}{\neg p \vee \neg  q}{F}" --
+        "\formel{6}{p \wedge q}{F}" [>"$\negt$ på 2"] -- 
+        "\formel{7}{\neg p}{F} \\ \formel{8}{\neg q}{F}" [>"$\lorf$ på 3"] --
+        "\formel{9}{p}{T}"  [> "$\negf$ på 7"] --
+        "\formel{10}{q}{T}" [> "$\negf$ på 8"] --
+        {
+          "\formel{11}{p}{F} \\ \times" ,
+          "\formel{12}{q}{F} \\ \times" [> "$\landf$ på 6"]
+        }
+       ,
+       "\formel{4}{\neg (p \wedge q)}{F} \\ \formel{5}{\neg p \vee \neg q}{T}" [> "$\lrf$ på 1" near end] --
+       "\formel{13}{p \wedge q}{T}" [>"$\negf$ på 4"] --
+       "\formel{14}{p}{T} \\ \formel{15}{q}{T}" [>"$\landt$ på 13"] --
+       {
+         "\formel{16}{\neg p}{T}" -- "\formel{18}{p}{F} \\ \times" [>"$\negt$ på 16"] ,
+         "\formel{17}{\neg q}{T}" [>"$\lort$ på 5"] -- "\formel{19}{q}{F}  \\ \times" [>"$\negt$ på 17"]
+       }
+     }
+   };
+ \end{tikzpicture}
+\]
+
+
+\end{document}
+
+  
